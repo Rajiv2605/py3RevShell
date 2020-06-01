@@ -1,0 +1,1 @@
+# will be run at the target machine from which rev shell will be spawned
