@@ -2,6 +2,12 @@
 import socket
 import sys
 
+NUMBER_OF_THREADS = 2
+JOB_NUMBER = [1, 2]
+queue = Queue()
+all_connections = []
+all_address = []
+
 def create_socket():
     try:
         global serverIP
@@ -26,32 +32,28 @@ def bind_socket():
     except socket.error as err:
         print("Error while binding socket: "+str(err))
 
-def accept_socket():
-    global s
-    conn, address = s.accept()
-    print("Connected to: "+address[0]+":"+str(address[1]))
-    run_commands(conn)
-    s.close()
+def accepting_connection():
+    # close if any open connection
+    for conn from all_connections:
+        conn.close()
 
-def run_commands(conn):
-    while True:
-        currPath = str(conn.recv(1024), "utf-8")
-        print(currPath, end="")
-        cmd = input()
-        if cmd == "exit":
-            conn.close()
-            sys.exit()
-        elif len(str.encode(cmd)) > 0:
-            conn.send(str.encode(cmd))
-            resp = str(conn.recv(1024), "utf-8")
-            if resp == "no-output":
-                resp = ""
-            print(resp)
-        conn.send(str.encode("next"))
+    del all_connections[:]
+    del all_address[:]
+
+    while true:
+        try:
+            conn, addr = s.accept()
+            s.setblocking(1) # to avoid timeout
+
+            all_address.append(addr)
+            all_connections.append(conn)
+
+            print("Connection established with: "+addr)
+        except:
+            print("Error making connection.. :(")
 
 def main():
     create_socket()
     bind_socket()
-    accept_socket()
 
 main()
