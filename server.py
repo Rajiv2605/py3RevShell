@@ -35,15 +35,19 @@ def accept_socket():
 
 def run_commands(conn):
     while True:
-        cmd = input(">> ")
+        currPath = str(conn.recv(1024), "utf-8")
+        print(currPath, end="")
+        cmd = input()
         if cmd == "exit":
             conn.close()
             sys.exit()
-        if len(str.encode(cmd)) > 0:
+        elif len(str.encode(cmd)) > 0:
             conn.send(str.encode(cmd))
             resp = str(conn.recv(1024), "utf-8")
-            print(resp, end="")
-
+            if resp == "no-output":
+                resp = ""
+            print(resp)
+        conn.send(str.encode("next"))
 
 def main():
     create_socket()

