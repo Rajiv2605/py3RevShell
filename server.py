@@ -9,7 +9,7 @@ def create_socket():
         global s
         serverIP = ""
         portNo = 1234
-        print("Creating socket: "+serverIP+":"+str(portNo))
+        print("Creating socket with machine IP: "+serverIP)
         s = socket.socket()
     except socket.error as err:
         print("Error while creating socket: "+str(err))
